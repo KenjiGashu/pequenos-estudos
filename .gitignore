@@ -1,0 +1,11 @@
+/*
+/**/.emacs-backups/
+!/gjstutorial/
+/**/gjstutorial/.emacs-backups
+/**/gjstutorial/*
+!/gjstutorial/parte1
+!/gjstutorial/parte2
+!/gjstutorial/parte3
+!/gjstutorial/parte4
+!/gjstutorial/d-bus
+!/.gitignore
