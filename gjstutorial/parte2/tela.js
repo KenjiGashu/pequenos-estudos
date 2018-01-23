@@ -18,24 +18,28 @@ const WelcomeToTheGrid = new Lang.Class({
 	this.application.connect('startup', Lang.bind(this, this._onStartup));
     },
 
-    //callback function for 'activate' signal presents windows when active
-    _onActivate: function(){
-	this._window.present();
+    // Callback function for 'activate' signal presents windows when active
+    _onActivate: function () {
+        this._window.present ();
     },
 
-    //callback function for 'startup' signal builds the UI
-    _onStartup: function(){
-	this._buildUI();
+    // Callback function for 'startup' signal builds the UI
+    _onStartup: function () {
+        this._buildUI ();
     },
 
-    //build the applications UI
-    _buildUI: function(){
-	//create the application window
-	this._window = new Gtk.ApplicationWindow({
-	    application: this.application,
-	    window_position: Gtk.WindowPosition.CENTER,
+    // Build the application's UI
+    _buildUI: function () {
+
+        // Create the application window
+        this._window = new Gtk.ApplicationWindow  ({
+            application: this.application,
+            title: "Welcome to the Grid",
 	    border_width: 10,
-	    title: 'welcome to the grid'});
+            default_height: 200,
+            default_width: 400,
+            window_position: Gtk.WindowPosition.CENTER });
+
 
 	// Create an image
 	this._image = new Gtk.Image ({ file: "gnome-image.png" });

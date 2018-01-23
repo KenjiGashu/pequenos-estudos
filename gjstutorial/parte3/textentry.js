@@ -36,6 +36,10 @@ const gettingSignal = new Lang.Class({
             border_width: 20,
             title: "Choose the one that says 'cookie'!"});
 
+	// Create the text entry field
+        this._spellCookie = new Gtk.Entry ();
+	
+	
 	// Create the radio buttons
         this._cookieRadio = new Gtk.RadioButton ({ label: "Cookie" });
         this._notCookieOne = new Gtk.RadioButton ({ label: "Not cookie",
@@ -67,7 +71,7 @@ const gettingSignal = new Lang.Class({
             row_spacing: 20 });
 	
 	// Put everything inside the grid
-        this._grid.attach (this._radioGrid, 0, 0, 1, 1);
+        this._grid.attach (this._spellCookie, 0, 0, 1, 1);
         this._grid.attach (this._cookieButton, 0, 1, 1, 1);
         this._grid.attach (this._cookieLabel, 0, 2, 1, 1);
 	
@@ -79,8 +83,9 @@ const gettingSignal = new Lang.Class({
     },
 
     _getACookie: function() {
-        // Did you select "cookie" instead of "not cookie"?
-        if (this._cookieRadio.get_active()) {
+
+        // Did you spell "cookie" correctly?
+        if ((this._spellCookie.get_text()).toLowerCase() == "cookie") {
 
             // Increase the number of cookies by 1 and update the label
             cookies++;

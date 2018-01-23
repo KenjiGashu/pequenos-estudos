@@ -28,29 +28,13 @@ const gettingSignal = new Lang.Class({
     _buildUI: function () {
 
         // Create the application window
-        this._window = new Gtk.ApplicationWindow({
+        this._window = new Gtk.ApplicationWindow  ({
             application: this.application,
-            window_position: Gtk.WindowPosition.CENTER,
+            title: "oi, pe",
+	    border_width: 10,
             default_height: 200,
             default_width: 400,
-            border_width: 20,
-            title: "Choose the one that says 'cookie'!"});
-
-	// Create the radio buttons
-        this._cookieRadio = new Gtk.RadioButton ({ label: "Cookie" });
-        this._notCookieOne = new Gtk.RadioButton ({ label: "Not cookie",
-            group: this._cookieRadio });
-        this._notCookieTwo = new Gtk.RadioButton ({ label: "Not cookie",
-						    group: this._cookieRadio });
-
-	// Arrange the radio buttons in their own grid
-        this._radioGrid = new Gtk.Grid ();
-        this._radioGrid.attach (this._notCookieOne, 0, 0, 1, 1);
-        this._radioGrid.attach (this._cookieRadio, 0, 1, 1, 1);
-        this._radioGrid.attach (this._notCookieTwo, 0, 2, 1, 1);
-
-	// Set the button that will be at the top to be active by default
-        this._notCookieOne.set_active (true);
+            window_position: Gtk.WindowPosition.CENTER });
 
 	// Create the label
         this._cookieLabel = new Gtk.Label ({
@@ -60,17 +44,32 @@ const gettingSignal = new Lang.Class({
         // Connect the cookie button to the function that handles clicking it
         this._cookieButton.connect ('clicked', Lang.bind (this, this._getACookie));
 
-	// Create a grid to arrange everything inside
+	// Create the switch that controls whether or not you can win
+        this._cookieSwitch = new Gtk.Switch ({active: true});
+	// Connect the switch to the function that handles it
+        // this._cookieSwitch.connect ('notify::active', Lang.bind (this, this._cookieDispenser));
+        // Create the label to go with the switch
+        this._switchLabel = new Gtk.Label ({
+            label: "Cookie dispenser" });
+        // Create a grid for the switch and its label
+        this._switchGrid = new Gtk.Grid ({
+            halign: Gtk.Align.CENTER,
+            valign: Gtk.Align.CENTER });
+        // Put the switch and its label inside that grid
+        this._switchGrid.attach (this._switchLabel, 0, 0, 1, 1);
+        this._switchGrid.attach (this._cookieSwitch, 1, 0, 1, 1);	
+
+        // Create a grid to arrange everything inside
         this._grid = new Gtk.Grid ({
             halign: Gtk.Align.CENTER,
             valign: Gtk.Align.CENTER,
             row_spacing: 20 });
-	
-	// Put everything inside the grid
-        this._grid.attach (this._radioGrid, 0, 0, 1, 1);
-        this._grid.attach (this._cookieButton, 0, 1, 1, 1);
+
+        // Put everything inside the grid
+        this._grid.attach (this._cookieButton, 0, 0, 1, 1);
+        this._grid.attach (this._switchGrid, 0, 1, 1, 1);
         this._grid.attach (this._cookieLabel, 0, 2, 1, 1);
-	
+
         // Add the grid to the window
         this._window.add (this._grid);
 
@@ -79,8 +78,9 @@ const gettingSignal = new Lang.Class({
     },
 
     _getACookie: function() {
-        // Did you select "cookie" instead of "not cookie"?
-        if (this._cookieRadio.get_active()) {
+
+        // Is the cookie dispenser turned on?
+        if (this._cookieSwitch.get_active()) {
 
             // Increase the number of cookies by 1 and update the label
             cookies++;
