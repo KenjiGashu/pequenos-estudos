@@ -1,5 +1,9 @@
 /*
 /**/.emacs-backups/
+
+##
+## GJS
+##
 !/gjstutorial/
 /**/gjstutorial/.emacs-backups
 /**/gjstutorial/*
@@ -7,5 +11,11 @@
 !/gjstutorial/parte2
 !/gjstutorial/parte3
 !/gjstutorial/parte4
-!/gjstutorial/d-bus
+!/gjstutorial/create-desktop
 !/.gitignore
+!/gjstutorial/create-desktop/Makefile.am
+!/gjstutorial/create-desktop/application.desktop.in
+!/gjstutorial/create-desktop/application.js
+!/gjstutorial/create-desktop/autogen.sh
+!/gjstutorial/create-desktop/configure.ac
+/**/gjstutorial/create-desktop/**

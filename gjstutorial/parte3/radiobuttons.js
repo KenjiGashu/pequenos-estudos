@@ -64,7 +64,8 @@ const gettingSignal = new Lang.Class({
         this._grid = new Gtk.Grid ({
             halign: Gtk.Align.CENTER,
             valign: Gtk.Align.CENTER,
-            row_spacing: 20 });
+	    column_homogeneous: true,
+	    row_spacing : 20 });
 	
 	// Put everything inside the grid
         this._grid.attach (this._radioGrid, 0, 0, 1, 1);
