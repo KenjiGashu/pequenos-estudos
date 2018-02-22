@@ -32,6 +32,6 @@ const DialogExample = new Lang.Class({
 
     //build applications ui
     _buildUI: function(){
-	this.window = new Gtk.ApplicationWindow
+	this.window = new Gtk.ApplicationWindow();
     },
 });
