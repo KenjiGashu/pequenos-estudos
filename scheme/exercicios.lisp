@@ -466,7 +466,60 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
       (list 6 7))))
 
 (define (square-tree tree)
-  (cond (((null? tree) tree)
-	 ((not (pair? tree)) (* tree tree))
-	 (else (square-tree (car tree))
-	       (square-tree (cdr tree))))))
+    (cond ((null? tree) tree)
+	  ((not (pair? tree)) (* tree tree))
+	  (else (cons (square-tree (car tree))
+		      (square-tree (cdr tree))))))
+(square-tree '())
+(square-tree (list 1))
+
+
+(square-tree (list 1
+      (list 2 (list 3 4) 5)
+      (list 6 7)))
+
+;; exercise 2.31
+
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
+(define (square-tree2 tree)
+    (define (square x) (* x x))
+  (define (map-tree proc tree)
+      (cond ((null? tree) tree)
+	    ((pair? tree) (cons (map-tree proc (car tree)) (map-tree proc (cdr tree))))
+	    (else (proc tree))))
+  (map-tree square tree))
+
+(define (tree-map proc tree) 
+    (map (lambda (sub-tree) 
+	   (if (pair? sub-tree) 
+	       (tree-map proc sub-tree) 
+	       (proc sub-tree))) 
+	 tree)) 
+
+(square-tree2 '())
+(square-tree2 (list 1 2 6))
+
+(square-tree2 (list 1
+      (list 2 (list 3 4) 5)
+      (list 6 7)))
+
+
+;; 2.32
+
+(define (subsets s)
+    (if (null? s)
+	(list '())
+	(let ((rest (subsets (cdr s))))
+	  (append rest (map (lambda (x) (cons (car s) x))
+			    rest)))))
+
+(subsets (list 1 2 3))
+(subsets '())
+(subsets (list 1))
+
+;; 
