@@ -522,4 +522,173 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (subsets '())
 (subsets (list 1))
 
-;; 
+
+;; 2.33
+
+;; filter
+(define (filter predicate sequence)
+    (cond ((null? sequence) nil)
+	  ((predicate (car sequence))
+	   (cons (car sequence)
+		 (filter predicate (cdr sequence))))
+	  (else (filter predicate (cdr sequence)))))
+
+;; accumulate
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+
+(define (map p sequence)
+    (accumulate (lambda (x y) (cons (p x) y)) nil sequence))
+
+(define (append seq1 seq2)
+    (accumulate cons seq2 seq1))
+
+(define (length sequence)
+    (accumulate (lambda (x y) (+ 1 y)) 0 sequence))
+
+
+;; 2.34
+
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
+(define (horner-eval x coefficient-sequence)
+    (accumulate (lambda (this-coeff higher-terms) (+ (* higher-terms x) this-coeff))
+		0
+		coefficient-sequence))
+
+(horner-eval 2 (list 1 3 0 5 0 1))
+
+;; 2.35
+
+;; map
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
+;; accumulate
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+;; old count leavews
+(define (count-leaves2 x)
+    (cond ((null? x) 0)
+	  ((not (pair? x)) 1)
+	  (else (+ (count-leaves2 (car x))
+		   (count-leaves2 (cdr x))))))
+
+(define (count-leaves t)
+    (accumulate +
+		0
+		(map (lambda (t)
+		       (cond ((null? t) '())
+			     ((pair? t) (count-leaves t))
+			     (else 1)))
+		     t)))
+
+(list (list (list 1 2) (list 3 4)) (list (list 5 6 7) (list 8 9 10)))
+(count-leaves2 (list (list (list 1 2) (list 3 4)) (list (list 5 6 7) (list 8 9 10))))
+(count-leaves (list (list (list 1 2) (list 3 4)) (list (list 5 6 7) (list 8 9 10))))
+
+
+;; 2.36
+
+(list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12))
+
+(car (cdr (list 1 2 3 4 5 6)))
+
+(define (accumulate-n op init seqs)
+    (define (filter jumps seq)
+	(cond ((null? seq) '())
+	      ((= jumps 0) (car seq))
+	      (else (filter (- jumps 1) (cdr seq)))))
+  (define (nths n t)
+      (cond ((pair? t) (cons (filter n (car t)) (nths n (cdr t))))))
+    (if (null? (car seqs))
+	'()
+	(cons (accumulate op init (nths )) ;jesus!
+	      ((accumulate-n op init (car seqs))))))
+
+;; solucao
+
+ (define (accumulate-n op init sequence) 
+   (define nil '()) 
+   (if (null? (car sequence)) 
+       nil 
+       (cons (accumulate op init (map car sequence)) 
+             (accumulate-n op init (map cdr sequence))))) 
+
+(accumulate-n + 0 (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
+
+
+
+;; 2.37
+
+
+(define (dot-product v w)
+    (accumulate + 0 (map * v w)))
+
+(define (matrix-*-vector m v)
+    (map (lambda (m-row)
+	   (dot-product m-row v))
+	 m))
+
+(define (transpose mat)
+    (accumulate-n cons '() mat))
+
+(define (matrix-*-matrix m n)
+    (let ((cols (transpose n)))
+      (map (lambda (m-row)
+	     (map (lambda (n-col)
+		    (dot-product m-row n-col))
+		  cols))
+	   m)))
+
+
+;; 2.38
+
+(define (fold-left op initial sequence)
+    (define (iter result rest)
+	(if (null? rest)
+	    result
+	    (iter (op result (car rest))
+		  (cdr rest))))
+  (iter initial sequence))
+
+(define (fold-right op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+(define nil '())
+
+(fold-right / 1 (list 1 2 3))
+(fold-left / 1 (list 1 2 3))
+(fold-right list nil (list 1 2 3))
+(fold-left list nil (list 1 2 3))
+;; eles têm que ser comutativo
+
+
+;; 2.39
+
+(define (reverse sequence)
+    (fold-right (lambda (x y)
+		  (append y (list x)))
+		nil sequence))
+(define (reverse sequence)
+    (fold-left (lambda (x y) (cons y x)) nil sequence))
+
+(reverse (list 1 2 3 ))
