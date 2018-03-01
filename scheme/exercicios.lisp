@@ -883,29 +883,90 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 
 (define (safe? k positions)
-    (cond ((null? positions) #t)
-	  ((= (caar (positions)) (car k)) #f)
-	  ((= (absolute (- (caar (positions)) (car k)))
-	      (absolute (- (cadar (positions)) (cadr k))))
-	   #f)
-	  ((= (cadar (positions)) (cadr k)) #f)
-	  (else (safe? k (cdr positions)))))
+    (define (func queen positions)
+	(let ((row (car queen))
+	      (col (cadr queen))
+	      (pr (caar positions))
+	      (pc (cadar positions))))
+	(cond ((null? positions) #t)
+	      ((= row pr) #f)
+	      ((= col pc))
+	      ((= (absolute (- row pr))
+		  (absolute (- col pc)))
+	       #f)
+	      (else (func queen (cdr positions)))))
+  (func (car positions) (cdr positions)))
+
+
+
 ;; me perdendo nos cadadar
 (null? (list (list 1 2)))
 (cond  ((= (caar (list (list 1 2))) (car (list 1 2))) #f)
-       (else #f))
+       (else #t))
 (caar (list (list 1 2) (list 3 4)))
 (caar (list (list 1 2)))
 
-;; teste safe?
+;;listas
 (list (list 1 2))
 (list (list 1 3) (list 2 6))
 (list (list 4 7) (list 1 2) (list 3 4))
 
-(safe? (list 1 2) (list )) 		;teste de null
+;; teste safe?
+;teste de null
+(safe? (list 1 2) (list ))
+;; row igual
 (safe? (list 1 1) (list (list 1 2)))
+;; diagonal negativo
+(safe? (list 1 1) (list (list 2 2)))
+;; diagonal positivo
+(safe? (list 3 3) (list (list 1 1)))
+;; coluna
+(safe? (list 3 1) (list (list 5 2) (list 7 1)))
+;; passar no teste
+(safe? (list 5 1) (list (list 1 6) (list 3 5) (list 8 7)))
+
+;; filter
+(define (filter predicate sequence)
+    (cond ((null? sequence) nil)
+	  ((predicate (car sequence))
+	   (cons (car sequence)
+		 (filter predicate (cdr sequence))))
+	  (else (filter predicate (cdr sequence)))))
+
+;; flatmap
+(define (flatmap proc seq)
+    (accumulate append nil (map proc seq)))
+
+;; make-interval
+(define (make-interval low high)
+    (cond ((> low high) '())
+	  (else (cons low (make-interval (+ low 1) high)))))
+					;make-triplet
+(define (make-triplet x y z)
+    (list x y z))
+
+(make-interval 1 4)
+
+;; accumulate
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+;; map
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
+
+(define (adjoin-position new-row k rest-of-queens)
+    (cons (list new-row k) rest-of-queens))
 
 (define (queens board-size)
+    (define empty-board '())
     (define (queen-cols k)
 	(if (= k 0)
 	    (list empty-board)
@@ -919,4 +980,12 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 	      (queen-cols (- k 1))))))
   (queen-cols board-size))
 
+
+
+(flatmap
+ (lambda (rest-of-queens)
+   (map (lambda (new-row)
+	  (adjoin-position new-row k rest-of-queens))
+	(enumerate-interval 1 board-size)))
+ (queen-cols (- k 1)))
 
