@@ -410,10 +410,10 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
     (car (cdr branch)))
 
 (define (branch-weight branch) 
-   (let ((s (branch-structure branch))) 
-     (if (pair? s) 
-         (total-weight s) 
-         s))) 
+    (let ((s (branch-structure branch))) 
+      (if (pair? s) 
+	  (total-weight s) 
+	  s))) 
 (branch-weight (make-branch 10 10))
 
 (define (total-weight mobile)
@@ -442,14 +442,14 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (define (branch-torque b)
     (* (branch-weight b)
        (branch-length b)))
- (define (balanced? mobile) 
-  
-   (let ((left (left-branch mobile)) 
-         (right (right-branch mobile))) 
-     (and (= (branch-torque left) 
-             (branch-torque right)) 
-          (branch-balanced? left) 
-          (branch-balanced? right))))
+(define (balanced? mobile) 
+    
+    (let ((left (left-branch mobile)) 
+	  (right (right-branch mobile))) 
+      (and (= (branch-torque left) 
+	      (branch-torque right)) 
+	   (branch-balanced? left) 
+	   (branch-balanced? right))))
 
 (balanced? (make-mobile (make-branch 10 10) (make-branch 10 10)))
 
@@ -462,8 +462,8 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 (define (right tree))
 (car (cdr (list 1
-      (list 2 (list 3 4) 5)
-      (list 6 7))))
+		(list 2 (list 3 4) 5)
+		(list 6 7))))
 
 (define (square-tree tree)
     (cond ((null? tree) tree)
@@ -475,8 +475,8 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 
 (square-tree (list 1
-      (list 2 (list 3 4) 5)
-      (list 6 7)))
+		   (list 2 (list 3 4) 5)
+		   (list 6 7)))
 
 ;; exercise 2.31
 
@@ -505,8 +505,8 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (square-tree2 (list 1 2 6))
 
 (square-tree2 (list 1
-      (list 2 (list 3 4) 5)
-      (list 6 7)))
+		    (list 2 (list 3 4) 5)
+		    (list 6 7)))
 
 
 ;; 2.32
@@ -616,19 +616,19 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 	      (else (filter (- jumps 1) (cdr seq)))))
   (define (nths n t)
       (cond ((pair? t) (cons (filter n (car t)) (nths n (cdr t))))))
-    (if (null? (car seqs))
-	'()
-	(cons (accumulate op init (nths )) ;jesus!
-	      ((accumulate-n op init (car seqs))))))
+  (if (null? (car seqs))
+      '()
+      (cons (accumulate op init (nths )) ;jesus!
+	    ((accumulate-n op init (car seqs))))))
 
 ;; solucao
 
- (define (accumulate-n op init sequence) 
-   (define nil '()) 
-   (if (null? (car sequence)) 
-       nil 
-       (cons (accumulate op init (map car sequence)) 
-             (accumulate-n op init (map cdr sequence))))) 
+(define (accumulate-n op init sequence) 
+    (define nil '()) 
+  (if (null? (car sequence)) 
+      nil 
+      (cons (accumulate op init (map car sequence)) 
+	    (accumulate-n op init (map cdr sequence))))) 
 
 (accumulate-n + 0 (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 
@@ -684,6 +684,7 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 ;; 2.39
 
+
 (define (reverse sequence)
     (fold-right (lambda (x y)
 		  (append y (list x)))
@@ -692,3 +693,230 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
     (fold-left (lambda (x y) (cons y x)) nil sequence))
 
 (reverse (list 1 2 3 ))
+
+
+;; livro
+
+;; map
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
+;; accumulate
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+(define nil '())
+
+;; interval
+(define (enumerate-interval low high)
+    (if (> low high)
+	nil
+	(cons low (enumerate-interval (+ low 1) high))))
+
+(map (lambda (i)
+       (map (lambda (j) (list i j))
+	    (enumerate-interval 1 (- i 1))))
+     (enumerate-interval 1 5))
+
+(accumulate append
+	    nil
+	    (map (lambda (i)
+		   (map (lambda (j) (list i j))
+			(enumerate-interval 1 (- i 1))))
+		 (enumerate-interval 1 5)))
+
+(define (flatmap proc seq)
+    (accumulate append nil (map proc seq)))
+
+(define (prime-sum? pair)
+    (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+    (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+
+(define (fast-prime? n times)
+    (cond ((= times 0) true)
+	  ((fermat-test n) (fast-prime? n (- times 1)))
+	  (else false)))
+
+(define (prime? n)
+    (= n (smallest-divisor n)))
+(define (square x) (* x x))
+
+(define (smallest-divisor n)
+    (find-divisor n 2))
+(define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+	  ((divides? test-divisor n) test-divisor)
+	  (else (find-divisor n (+ test-divisor 1)))))
+(define (divides? a b)
+    (= (remainder b a) 0))
+
+(define (prime-sum-pairs n)
+    (map make-pair-sum
+	 (filter prime-sum?
+		 (flatmap
+		  (lambda (i)
+		    (map (lambda (j) (list i j))
+			 (enumerate-interval 1 (- i 1))))
+		  (enumerate-interval 1 n)))))
+
+
+
+(define (permutations s)
+    (if (null? s)
+					; empty set?
+	(list nil)
+					; sequence containing empty set
+	(flatmap (lambda (x)
+		   (map (lambda (p) (cons x p))
+			(permutations (remove x s))))
+		 s)))
+;; filter
+(define (filter predicate sequence)
+    (cond ((null? sequence) nil)
+	  ((predicate (car sequence))
+	   (cons (car sequence)
+		 (filter predicate (cdr sequence))))
+	  (else (filter predicate (cdr sequence)))))
+
+(define (remove item sequence)
+    (filter (lambda (x) (not (= x item)))
+	    sequence))
+
+
+;; exercise 2.40
+(define (unique-pairs n)
+    (let ((low 1)
+	  (high n))
+      (flatmap (lambda (i)
+		 (map (lambda (j)
+			(list i j))
+		      (enumerate-interval 1 i)))
+	       (enumerate-interval low high))))
+
+(define (prime-sum-pairs n)
+    (map make-pair-sum
+	 (filter prime-sum?
+		 (unique-pairs n))))
+
+(unique-pairs 4)
+
+
+(prime-sum-pairs 5)
+
+
+
+;; exrecise 2.41
+
+;; flatmap
+(define (flatmap proc seq)
+    (accumulate append nil (map proc seq)))
+
+;; make-interval
+(define (make-interval low high)
+    (cond ((> low high) '())
+	  (else (cons low (make-interval (+ low 1) high)))))
+					;make-triplet
+(define (make-triplet x y z)
+    (list x y z))
+
+(make-interval 1 4)
+
+;; accumulate
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+	initial
+	(op (car sequence)
+	    (accumulate op initial (cdr sequence)))))
+
+;; nil
+(define nil '())
+
+;; filter 
+(define (filter predicate sequence)
+    (cond ((null? sequence) nil)
+	  ((predicate (car sequence))
+	   (cons (car sequence)
+		 (filter predicate (cdr sequence))))
+	  (else (filter predicate (cdr sequence)))))
+
+(define (unique-triplets n)
+    (flatmap (lambda (i)
+	       (flatmap (lambda (j)
+			  (map (lambda (k)
+				 (make-triplet i j k))
+			       (make-interval 1 j)))
+			(make-interval 1 i)))
+	     (make-interval 1 n)))
+
+(unique-triplets 3)
+
+(define (sum-triplet-equal ))
+
+(define (triplet-sum-s range sum)
+    (define (sum-triplet-equal? n)
+	(= (accumulate + 0 n) sum))
+  (filter sum-triplet-equal? (unique-triplets range)))
+
+(triplet-sum-s 3 5)
+
+(triplet-sum-s)
+
+
+
+;; exercise 2.42
+
+(define (absolute x)
+    (cond ((< x 0) (- x))
+	  (else x)))
+
+;; teste abso
+(absolute (- 20))
+(absolute 20)
+
+
+(define (safe? k positions)
+    (cond ((null? positions) #t)
+	  ((= (caar (positions)) (car k)) #f)
+	  ((= (absolute (- (caar (positions)) (car k)))
+	      (absolute (- (cadar (positions)) (cadr k))))
+	   #f)
+	  ((= (cadar (positions)) (cadr k)) #f)
+	  (else (safe? k (cdr positions)))))
+;; me perdendo nos cadadar
+(null? (list (list 1 2)))
+(cond  ((= (caar (list (list 1 2))) (car (list 1 2))) #f)
+       (else #f))
+(caar (list (list 1 2) (list 3 4)))
+(caar (list (list 1 2)))
+
+;; teste safe?
+(list (list 1 2))
+(list (list 1 3) (list 2 6))
+(list (list 4 7) (list 1 2) (list 3 4))
+
+(safe? (list 1 2) (list )) 		;teste de null
+(safe? (list 1 1) (list (list 1 2)))
+
+(define (queens board-size)
+    (define (queen-cols k)
+	(if (= k 0)
+	    (list empty-board)
+	    (filter
+	     (lambda (positions) (safe? k positions))
+	     (flatmap
+	      (lambda (rest-of-queens)
+		(map (lambda (new-row)
+		       (adjoin-position new-row k rest-of-queens))
+		     (enumerate-interval 1 board-size)))
+	      (queen-cols (- k 1))))))
+  (queen-cols board-size))
+
+
