@@ -884,6 +884,7 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 (define (safe? k positions)
     (cond ((null? positions) #t)
+	  ((> 1 0) #f)
 	  ((= (caar (positions)) (car k)) #f)
 	  ((= (absolute (- (caar (positions)) (car k)))
 	      (absolute (- (cadar (positions)) (cadr k))))
@@ -902,7 +903,8 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (list (list 1 3) (list 2 6))
 (list (list 4 7) (list 1 2) (list 3 4))
 
-(safe? (list 1 2) (list )) 		;teste de null
+;; teste null
+(safe? (list 1 2) (list ))
 (safe? (list 1 1) (list (list 1 2)))
 
 (define (queens board-size)
