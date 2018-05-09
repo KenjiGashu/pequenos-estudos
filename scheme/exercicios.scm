@@ -819,6 +819,12 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (define (flatmap proc seq)
     (accumulate append nil (map proc seq)))
 
+(define (map proc items)
+    (if (null? items)
+	'()
+	(cons (proc (car items))
+	      (map proc (cdr items)))))
+
 ;; make-interval
 (define (make-interval low high)
     (cond ((> low high) '())
@@ -881,7 +887,6 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (absolute (- 20))
 (absolute 20)
 
-
 (define (safe? k positions)
 
     ;; (cond ((null? positions) #t)
@@ -893,29 +898,28 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
     ;; 	  ((= (cadar (positions)) (cadr k)) #f)
     ;; 	  (else (safe? k (cdr positions)))))
 
-    (define (func queen positions)
-	(let ((row (car queen))
-	      (col (cadr queen))
-	      (pr (caar positions))
-	      (pc (cadar positions))))
-      (cond ((null? positions) #t)
-	    ((= row pr) #f)
-	    ((= col pc))
-	    ((= (absolute (- row pr))
-		(absolute (- col pc)))
-	     #f)
-	    (else (func queen (cdr positions)))))
-  (func (car positions) (cdr positions)))
+    (let ((row (caar positions))
+	  (col (cadar positions)))
+      (define (func queen positions)
+	  (if (null? positions) #t
+	      (let ((row (car queen))
+		(col (cadr queen))
+		(pr (caar positions))
+		(pc (cadar positions)))
+	    (cond ((null? positions) #t)
+		  ((= row pr) #f)
+		  ((= col pc))
+		  ((= (absolute (- row pr))
+		      (absolute (- col pc)))
+		   #f)
+		  (else (func queen (cdr positions)))))))
+      (func (list row col) (cdr positions))))
 
+(define (safe? oi tchau)
+    (display oi))
 
+(safe? '3 (list (list 1 1) (list 2 4)))
 
-
-;; me perdendo nos cadadar
-(null? (list (list 1 2)))
-(cond  ((= (caar (list (list 1 2))) (car (list 1 2))) #f)
-       (else #t))
-(caar (list (list 1 2) (list 3 4)))
-(caar (list (list 1 2)))
 
 ;;listas
 (list (list 1 2))
@@ -923,23 +927,6 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (list (list 4 7) (list 1 2) (list 3 4))
 
 
-;; teste null
-(safe? (list 1 2) (list ))
-
-;; teste safe?
-;teste de null
-(safe? (list 1 2) (list ))
-;; row igual
-
-(safe? (list 1 1) (list (list 1 2)))
-;; diagonal negativo
-(safe? (list 1 1) (list (list 2 2)))
-;; diagonal positivo
-(safe? (list 3 3) (list (list 1 1)))
-;; coluna
-(safe? (list 3 1) (list (list 5 2) (list 7 1)))
-;; passar no teste
-(safe? (list 5 1) (list (list 1 6) (list 3 5) (list 8 7)))
 
 ;; filter
 (define (filter predicate sequence)
@@ -979,9 +966,10 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 
 
 (define (adjoin-position new-row k rest-of-queens)
-    (map (lambda (rest-of-queens)
-	   (cons (list new-row k) rest-of-queens))
-	 rest-of-queens))
+    ;; (map (lambda (rest-of-queens)
+    ;; 	   (cons (list new-row k) rest-of-queens))
+    ;; 	 rest-of-queens)
+  (cons (list new-row k) rest-of-queens))
 
 (define (queens board-size)
     (define empty-board '())
@@ -1010,12 +998,487 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
    (map (lambda (new-row)
 	  (adjoin-position new-row 3 rest-of-queens))
 	(enumerate-interval 1 4))) 
- (list (list (list 1 1) (list 2 4)) (list (list 1 2) (list 2 4)) (list (list 1 4) (list 2 8))))
+ (list (list (list 1 1) (list 2 4))))
 
 
-(car   (map (lambda (new-row)
-	  (adjoin-position new-row 3 (list (list (list 1 1) (list 2 4)) (list (list 1 2) (list 2 4)) (list (list 1 4) (list 2 8)))))
-	(enumerate-interval 1 4)))
+(car (map (lambda (new-row)
+       (adjoin-position new-row 3 (list (list (list 1 1) (list 2 4)))))
+     (enumerate-interval 1 4)))
+
+(map (lambda (new-row)
+       (adjoin-position new-row 3 (list (list (list 1 1) (list 2 4)))))
+     (enumerate-interval 1 4))
+
+(list (list (list (list 1 3) (list 1 1) (list 2 4)))
+ (list (list (list 2 3) (list 1 1) (list 2 4)))
+ (list (list (list 3 3) (list 1 1) (list 2 4)))
+ (list (list (list 4 3) (list 1 1) (list 2 4))))
+
+(accumulate append nil (map (lambda (rest-of-queens)
+			      (map (lambda (new-row)
+				     (adjoin-position new-row 3 rest-of-queens))
+				   (enumerate-interval 1 4)))
+			    (list (list (list 1 1) (list 2 4)) (list (list 7 8) (list 6 7)))))
+
+(list (list 1 1) (list 2 4))
+
+(list (list (list 1 1) (list 2 4)))
+
+(adjoin-position 4 3 (list (list 1 1) (list 2 4)))
+
+(cons (list 4 3) (list (list 1 1) (list 2 4)))
+
+(queens 3)
+(queens 0)
+(queens 1)
+(queens 2)
+(queens 4)
 
 
-(adjoin-position 4 3  (list (list (list 1 1) (list 2 4)) (list (list 1 2) (list 2 4)) (list (list 1 4) (list 2 8))))
+;; exercise 2.43
+
+;; creates 64 rows instead of 8 rows when mapping
+
+
+(flatmap
+ (lambda (rest-of-queens)
+   (map (lambda (new-row)
+	  (adjoin-position new-row 3 rest-of-queens))
+	(enumerate-interval 1 4))) 
+ (queen-cols (- k 1)))
+
+
+(flatmap
+ (lambda (new-row)
+   (map (lambda (rest-of-queens)
+	  (adjoin-position new-row k rest-of-queens))
+	(queen-cols (- k 1))))
+ (enumerate-interval 1 board-size))
+
+
+;; exercise 2.44
+
+(define (up-split painter n)
+    (if (= n 0)
+	painter
+	(let ((smaller (up-split painter (- n 1))))
+	  (below (beside smaller smaller) painter))))
+
+
+;;; =========== 2.3 =================
+
+;; 2.53???
+(define (memq item list)
+    (cond ((null? list) #f) 
+	  ((eq? item (car list)) list)
+	  (else (memq item (cdr list)))))
+
+;; 2.54
+
+(define (equal? list1 list2)
+    (or (eq? list1 list2)
+	(and (equal? (car list1) (car list2))
+	     (equal? (cdr list1) (cdr list2)))))
+
+(define (equal? list1 list2)
+    (cond ((and (null? list1) (null? list2)) #t)
+	  ((not (eq? (car list1) (car list2))) #f)
+	  (else (equal? (cdr list1) (cdr list2)))))
+
+
+
+(equal? (list  1 2) (list 1 2)) 
+
+(equal? (list 1 2 3) (list 1 2 3))
+
+
+
+
+;; 2.3.2 ??????????????????????????
+
+(define (deriv exp var)
+    (cond ((number? exp) 0)
+	  ((variable? exp)
+	   (if (same-variable? exp var) 1 0))
+	  ((sum?2 exp)
+	   (make-sum (deriv (addend2 exp) var)
+		     (deriv (augend exp) var)))
+	  ((product?2 exp)
+	   (make-sum
+	    (make-product (multiplier2 exp)
+			  (deriv (multiplicand exp) var))
+	    (make-product (deriv (multiplier2 exp) var)
+			  (multiplicand exp))))
+	  ((exponentiation? exp)
+	   (make-product (deriv (base exp) var)
+			 (make-product (make-exponentiation (base exp) (- (exponent exp) 1))
+				       (exponent exp))))
+	  (else
+	   (error "unknown expression type -- DERIV" exp))))
+
+(define (=number? exp num) 
+  (and (number? exp) (= exp num))) 
+
+
+(define (variable? x) (symbol? x))
+
+(define (same-variable? v1 v2)
+    (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (make-sum a1 a2) (list '+ a1 a2))
+
+(define (make-sum a1 a2)
+    (cond ((=number? a1 0) a2)
+	  ((=number? a2 0) a1)
+	  ((and (number? a1) (number? a2)) (+ a1 a2))
+	  (else (list '+ a1 a2))))
+
+(define (make-product m1 m2) (list '* m1 m2))
+
+(define (make-product m1 m2)
+    (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+	  ((=number? m1 1) m2)
+	  ((=number? m2 1) m1)
+	  ((and (number? m1) (number? m2)) (* m1 m2))
+	  (else (list '* m1 m2))))
+
+(define (sum? x)
+    (and (pair? x) (eq? (car x) '+)))
+
+(define (addend s) (cadr s))
+
+(define (augend s) (caddr s))
+
+(define (product? x)
+    (and (pair? x) (eq? (car x) '*)))
+
+(define (multiplier p) (cadr p))
+
+(define (multiplicand p) (caddr p))
+
+
+;; exercise 2.56
+
+(define (exponentiation? x)
+    (and (pair? x) (eq? (car x) 'expo)))
+
+(define (base x) (cadr x))
+
+(define (exponent x) (caddr x))
+
+(define (make-exponentiation x exp)
+    (cond ((= exp 0) 1)
+	  ((= exp 1) x)
+	  (list 'expo x exp)))
+
+;; exercise 2.57
+
+(define (accumulate op initial sequence) 
+  (if (null? sequence) 
+      initial 
+      (op (car sequence) 
+	  (accumulate op initial (cdr sequence))))) 
+
+(define (augend-list s)
+  (accumulate make-sum 0 (cddr s)))
+
+
+(define (multiplicand-list p)  
+  (accumulate make-product 1 (cddr  p))) 
+
+(define (make-sum-list . args)
+  (cond ((=number? (car args) 0) (make-sum (cdr args)))
+	(else (list '+ (car args) (make-sum (cdr args))))))
+
+
+(augend-list '(1 2 3 4 5))
+
+;;  2.58 a ?????????????????ww
+
+(define (sum?2 s)
+  (or (and (pair? s) (eq? '+ (car s)))
+      (and (pair? s) (eq? '+ (cadr s)))))
+
+(define (product?2 p)
+  (or (and (pair? p) (eq? '* (car p)))
+      (and (pair? p) (eq? '* (cadr p)))))
+
+(define (addend2 s)
+  (if (eq? (car s) '+)
+      (cadr s)
+      (car s)))
+
+(define (augend2 s)
+  (caddr s))
+
+(define (multiplier2 p)
+  (if (eq? (car p) '*)
+      (cadr p)
+      (car p)))
+
+(deriv '(x * y) 'x)
+
+(define (prob? s)
+  (if (null? prob)
+      ))
+
+;; 2.3.3
+
+(define (element-of-set? x set)
+  (cond ((null? set) #f)
+	((equal? x (car set)) #t)
+	(else (element-of-set? x (cdr set)))))
+
+(define (adjoin-set x set)
+  (if (element-of-set? x set)
+      set
+      (cons x set)))
+
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) ’())
+	((element-of-set? (car set1) set2)
+	 (cons (car set1)
+	       (intersection-set (cdr set1) set2)))
+	(else (intersection-set (cdr set1) set2))))
+
+;; exercise 2.59
+
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+	((element-of-set? (car set1) set2) (union-set (cdr set1) set2))
+	(else (cons (car set1)
+		    (union-set (cdr set1) set2)))))
+
+;; exercise 2.60
+
+;; element of set nao muda
+;; adjoin-set so faz um cons
+;; union junta os dois sem checar
+;; intersection set continua a mesma coisa
+
+
+
+;; ordered sets
+
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+	((= x (car set)) true)
+	((< x (car set)) false)
+	(else (element-of-set? x (cdr set)))))
+
+(define (intersection-set set1 set2)
+  (if (or (null? set1) (null? set2))
+      ’()
+       (let ((x1 (car set1)) (x2 (car set2)))
+	 (cond ((= x1 x2)
+		(cons x1
+		      (intersection-set (cdr set1)
+					(cdr set2))))
+	       ((< x1 x2)
+		(intersection-set (cdr set1) set2))
+	       ((< x2 x1)
+		(intersection-set set1 (cdr set2)))))))
+
+
+
+;; exercise 2.61
+
+(define (adjoin-set-ordered element set)
+  (define (adjoin-with-ant anterior element set)
+    (cond ((null? set) (cond ((null? anterior) (cons element set))
+			     (else (cons anterior (list element)))))
+	  ((= element (car set)) set)
+	  ((> (car set) element) (cons anterior (cons element set)))
+	  (else (adjoin-with-ant (car set) element (cdr set)))))
+  (adjoin-with-ant '() element set))
+
+
+(define (adjoin-set-ordered2 x set)
+  (cond ((or (null? set) (< x (car set))) (cons x set))
+	((= x (car set)) set)
+	((cons (car set) (adjoin-set-ordered2 x (cdr set))))))
+
+;; exercise 2.62
+
+(define (union-set set1 set2)
+  (cond ((null? set2) set1)
+	((null? set1) set2)
+	((= (car set1) (car set2)) (cons (car set2) (union-set (cdr set1) (cdr set2))))
+	((> (car set1) (car set2)) (cons (car set1) (union-set (cdr set1) set2)))
+	(else (cons (car set2) (union-set set1 (cdr set2))))))
+
+;; binary tree set
+
+(define (entry tree)
+  (car tree))
+
+(define (left-branch tree)
+  (cadr tree))
+
+(define (right-branch tree)
+  (caddr tree))
+
+(define (make-tree entry left right)
+  (list entry left right))
+
+(define (element-of-set-tree? element tree)
+  (cond ((null? tree) #f)
+	((= element (entry tree)) #t)
+	((> element (entry tree)) (element-of-set-tree? element (left-branch tree)))
+	(else (element-of-set-tree? element (right-branch tree)))))
+
+(define (adjoin-tree element tree)
+  (cond ((null? tree) (make-tree element '() '()))
+	((= element (entry tree)) tree)
+	((> element (entry tree)) (make-tree (entry tree) (adjoin-tree element (left-branch tree)) (right-branch tree)))
+	(else (make-tree (entry tree) (left-branch tree) (adjoin-tree element (right-branch tree))))))
+
+
+
+;; exercise 2.63
+
+;;A geram a mesma lista
+
+;;B o primeiro roda um append a mais na metade da arvore
+
+
+;; exercise 2.64
+
+;; A pega metade e gera o lado esquerdo (chamada recursiva). pega um cara e faz virar root. gera o lado direito com o resto (outra chamada). depois junto o que sobrou com a arvore
+
+;; T(n)= T(n/2) + T(n/2)
+
+
+;; exrecise 2.65
+
+(define (union-tree tree1 tree2)
+  (cond ((null? tree1) tree2)
+	((null? tree2) tree1)
+	((< (entry tree1) (entry tree2))
+	 (make-tree (entry tree2)
+		    (union-tree (make-tree (entry tree1) (left-branch tree1) '())
+				(left-branch (union-tree (right-branch tree1) tree2)))
+		    (right-branch tree2)))
+	 ;; (union-tree (make-tree (entry tree1) (left-branch tree1) '())
+	 ;; 					     (union-tree (right-branch tree1) tree2)))
+	((> (entry tree1) (entry tree2))
+	 (make-tree (entry tree2)
+		    (left-branch tree2)
+		    (union-tree (make-tree (entry tree1) (right-branch tree1) '())
+				(right-branch (union-tree (left-branch tree1) tree2)))))
+	 ;; (union-tree (union-tree (left-branch tree1) tree2)
+	 ;; 					     (make-tree (entry tree1) (right-branch tree1) '())))
+	((= (entry tree1) (entry tree2))
+	 (make-tree (entry tree2)
+		    (union-tree (left-branch tree1) (left-branch tree2))
+		    (union-tree (right-branch tree1) (right-branch tree2))))))
+
+
+(union-tree (make-tree 10 (make-tree 5 '() '()) '()) (make-tree 50 (make-tree 25 '() (make-tree 36 '() '())) (make-tree 150 '() '())))
+
+;; sets and information retrieval
+;; exercise 2.66
+
+(define (lookup given-key set-of-records)
+  (cond ((null? set-of-records) #f)
+	((equal? given-key (key (entry set-of-records))) (entry set-of-records))
+	((> given-key (key (entry set-of-records))) (lookup given-key (right-branch set-of-records)))
+	((< given-key (key (entry set-of-records))) (lookup given-key (left-branch set-of-records)))))
+
+
+
+
+;; 2.3.4 Example: Huffman Encoding Trees
+
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
+(define (leaf? object)
+  (eq? (car object) 'leaf))
+(define (symbol-leaf x) (cadr x))
+(define (weight-leaf x) (caddr x))
+
+(define (make-code-tree left right)
+  (list left
+	right
+	(append (symbols left) (symbols right))
+	(+ (weight left) (weight right))))
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+(define (symbols tree)
+  (if (leaf? tree)
+      (list (symbol-leaf tree))
+      (caddr tree)))
+(define (weight tree)
+  (if (leaf? tree)
+      (weight-leaf tree)
+      (cadddr tree)))
+
+
+(define (decode bits tree)
+  (define (decode-1 bits current-branch)
+    (if (null? bits)
+	'()
+	 (let ((next-branch
+		(choose-branch (car bits) current-branch)))
+	   (if (leaf? next-branch)
+	       (cons (symbol-leaf next-branch)
+		     (decode-1 (cdr bits) tree))
+	       (decode-1 (cdr bits) next-branch)))))
+  (decode-1 bits tree))
+(define (choose-branch bit branch)
+  (cond ((= bit 0) (left-branch branch))
+	((= bit 1) (right-branch branch))
+	(else (error "bad bit -- CHOOSE-BRANCH" bit))))
+
+(define (adjoin-set x set)
+  (cond ((null? set) (list x))
+	((< (weight x) (weight (car set))) (cons x set))
+	(else (cons (car set)
+		    (adjoin-set x (cdr set))))))
+
+
+(define (make-leaf-set pairs)
+  (if (null? pairs)
+      '()
+       (let ((pair (car pairs)))
+	 (adjoin-set (make-leaf (car pair)
+					; symbol
+				(cadr pair)) ; frequency
+		     (make-leaf-set (cdr pairs))))))
+
+
+(define sample-tree
+  (make-code-tree (make-leaf 'A 4)
+		  (make-code-tree
+		   (make-leaf 'B 2)
+		   (make-code-tree (make-leaf 'D 1)
+				   (make-leaf 'C 1)))))
+(define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
+
+(define sample-char-msg '(A B C))
+
+(decode sample-message sample-tree)
+
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+       (append (encode-symbol (car message) tree)
+	       (encode (cdr message) tree))))
+
+
+(define (element-of-set? x set) 
+   (cond ((null? set) #f) 
+         ((equal? x (car set)) #t) 
+         (else (element-of-set? x (cdr set))))) 
+
+
+
+(define (encode-symbol msg-char tree)
+  (cond ((null? tree) (error "not in the tree" msg-char))
+	((leaf? tree) '())
+	((element-of-set? msg-char (symbols (left-branch tree))) (cons 0 (encode-symbol msg-char (left-branch tree))))
+	((element-of-set? msg-char (symbols (right-branch tree))) (cons 1 (encode-symbol msg-char (right-branch tree))))))
+
+(encode sample-char-msg sample-tree)
