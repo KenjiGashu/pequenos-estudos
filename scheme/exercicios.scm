@@ -1,4 +1,3 @@
-
 ;; exercise 2.2
 (define (print-point p)
     (newline)
@@ -1482,3 +1481,39 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 	((element-of-set? msg-char (symbols (right-branch tree))) (cons 1 (encode-symbol msg-char (right-branch tree))))))
 
 (encode sample-char-msg sample-tree)
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+
+(define (make-code-tree left right)
+  (list left
+	right
+	(append (symbols left) (symbols right))
+	(+ (weight left) (weight right))))
+
+(define (length list)
+  (define (iter-length size list)
+    (cond ((null? list) size)
+	  (else (iter-length (+ size 1) (cdr list))))))
+
+(define (successive-merge list)
+  (cond ((= (length list) 1) (car list))
+	(else (let ((first (car))
+		    (second (cadr))
+		    (rest (cddr)))
+		(successive-merge (adjoin-set (make-code-tree first second)
+					      rest))))))
+
+
+(successive-merge (list (make-leaf 'a 3) (make-leaf 'b 18)))
+
+
+(define (successive-merge ordered-leaf-list)
+  (cond ((<= (length ordered-leaf-list) 1) (car ordered-leaf-list))
+	(else (let ((first-leaf (car ordered-leaf-list))
+		    (second-leaf (cadr ordered-leaf-list))
+		    (rest-of-list (cddr ordered-leaf-list)))
+		(successive-merge (adjoin-set (make-code-tree first second)
+					      rest))))))
+
+(cdr list)
