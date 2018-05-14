@@ -1460,6 +1460,8 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 (decode sample-message sample-tree)
 
 
+;; exercise 2.68
+
 (define (encode message tree)
   (if (null? message)
       '()
@@ -1496,16 +1498,144 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
     (cond ((null? list) size)
 	  (else (iter-length (+ size 1) (cdr list))))))
 
-(define (successive-merge list)
-  (cond ((= (length list) 1) (car list))
-	(else (let ((first (car))
-		    (second (cadr))
-		    (rest (cddr)))
-		(successive-merge (adjoin-set (make-code-tree first second)
-					      rest))))))
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+	((equal? x (car set)) true)
+	(else (element-of-set? x (cdr set)))))
+
+(define (adjoin-set x set)
+  (if (element-of-set? x set)
+      set
+      (cons x set)))
 
 
-(successive-merge (list (make-leaf 'a 3) (make-leaf 'b 18)))
+(list (make-leaf 'a 3) (make-leaf 'b 1))
+
+;; exercise 2.69
+
+(define test-set (list (make-leaf 'b 3) (make-leaf 'a 8)))
+(define test-set2 (list (make-leaf 'y 1) (make-leaf 'b 3) (make-leaf 'c 3) (make-leaf 'e 5) (make-leaf 'a 8)))
+(define test-set3 (list (make-leaf 'b 3) (make-leaf 'a 8) (make-leaf 'e 9)))
+
+
+(define (equal? list1 list2)
+  (cond ((and (null? list1) (null? list2)) #t)
+	((and (pair? list1) (pair? list2)) (and (equal? (car list1) (car list2)) (equal? (cdr list1) (cdr list2))))
+	;; ((and (pair? list1) (pair? list2)) (and (equal? (car list1) (car list2)) (equal? (cdr list1) (cdr list2))))
+	;; (else (and (eq? list1 list2) (equal? (cdr list1) (cdr list2))))
+	((and (not (pair? list1)) (not (pair? list2))) (eq? list1 list2))
+	(else (and (eq? list1 list2) (equal? (cdr list1) (cdr list2))))))
+
+
+(define (adjoin-set x set)
+  (cond ((null? set) (list x))
+	((< (weight x) (weight (car set))) (cons x set))
+	(else (cons (car set)
+		    (adjoin-set x (cdr set))))))
+
+(adjoin-set (make-leaf 'e 5) (adjoin-set (make-leaf 'y 1) (adjoin-set (make-leaf 'c 3) test-set)))
+
+
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
+(define (leaf? object)
+  (eq? (car object) 'leaf))
+(define (symbol-leaf x) (cadr x))
+(define (weight-leaf x) (caddr x))
+
+(define (make-code-tree left right)
+  (list left
+	right
+	(append (symbols left) (symbols right))
+	(+ (weight left) (weight right))))
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+(define (symbols tree)
+  (if (leaf? tree)
+      (list (symbol-leaf tree))
+      (caddr tree)))
+(define (weight tree)
+  (if (leaf? tree)
+      (weight-leaf tree)
+      (cadddr tree)))
+
+(define (successive-merge ordered-leaf-list)
+  (cond ((<= (length ordered-leaf-list) 1) (car ordered-leaf-list))
+	(else (let ((first-leaf (car ordered-leaf-list))
+		    (second-leaf (cadr ordered-leaf-list))
+		    (rest-of-list (cddr ordered-leaf-list)))
+		
+		(successive-merge (adjoin-set (make-code-tree first-leaf second-leaf)
+					      rest-of-list))))))
+
+(define (make-leaf-set pairs)
+  (define (iteration pairs resp)
+    (cond ((null? pairs) resp)
+	  (else (adjoin-set (car pairs) (make-leaf-set (cdr pairs))))))
+  (iteration pairs '()))
+
+(make-leaf-set test-set)
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+
+(generate-huffman-tree test-set3)
+
+
+
+;; exercise 2.70
+
+
+(define (length list)
+  (define (iter-length size list)
+    (cond ((null? list) size)
+	  (else (iter-length (+ size 1) (cdr list)))))
+  (iter-length 0 list))
+
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
+(define (leaf? object)
+  (eq? (car object) 'leaf))
+(define (symbol-leaf x) (cadr x))
+(define (weight-leaf x) (caddr x))
+
+(define (make-code-tree left right)
+  (list left
+	right
+	(append (symbols left) (symbols right))
+	(+ (weight left) (weight right))))
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+(define (symbols tree)
+  (if (leaf? tree)
+      (list (symbol-leaf tree))
+      (caddr tree)))
+(define (weight tree)
+  (if (leaf? tree)
+      (weight-leaf tree)
+      (cadddr tree)))
+
+
+(define (equal? list1 list2)
+  (cond ((and (null? list1) (null? list2)) #t)
+	((and (pair? list1) (pair? list2)) (and (equal? (car list1) (car list2)) (equal? (cdr list1) (cdr list2))))
+	((and (not (pair? list1)) (not (pair? list2))) (eq? list1 list2))
+	(else (and (eq? list1 list2) (equal? (cdr list1) (cdr list2))))))
+
+
+(define (element-of-set? x set) 
+   (cond ((null? set) #f) 
+         ((equal? x (car set)) #t) 
+         (else (element-of-set? x (cdr set))))) 
+
+(define (adjoin-set x set)
+  (cond ((null? set) (list x))
+	((< (weight x) (weight (car set))) (cons x set))
+	(else (cons (car set)
+		    (adjoin-set x (cdr set))))))
+
 
 
 (define (successive-merge ordered-leaf-list)
@@ -1513,7 +1643,454 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
 	(else (let ((first-leaf (car ordered-leaf-list))
 		    (second-leaf (cadr ordered-leaf-list))
 		    (rest-of-list (cddr ordered-leaf-list)))
-		(successive-merge (adjoin-set (make-code-tree first second)
-					      rest))))))
+		(successive-merge (adjoin-set (make-code-tree first-leaf second-leaf)
+					      rest-of-list))))))
+(define (make-leaf-set pairs)
+  (define (iteration pairs resp)
+    (cond ((null? pairs) resp)
+	  (else (adjoin-set (car pairs) (make-leaf-set (cdr pairs))))))
+  (iteration pairs '()))
 
-(cdr list)
+(adjoin-set (make-code-tree (car test-set) (cadr test-set))
+	    '())
+
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+       (append (encode-symbol (car message) tree)
+	       (encode (cdr message) tree))))
+
+
+(define (encode-symbol msg-char tree)
+  (cond ((null? tree) (error "not in the tree" msg-char))
+	((leaf? tree) '())
+	((element-of-set? msg-char (symbols (left-branch tree))) (cons 0 (encode-symbol msg-char (left-branch tree))))
+	((element-of-set? msg-char (symbols (right-branch tree))) (cons 1 (encode-symbol msg-char (right-branch tree))))))
+
+(define test-set (list (make-leaf 'b 3) (make-leaf 'a 8)))
+(define test-set2 (list (make-leaf 'y 1) (make-leaf 'b 3) (make-leaf 'c 3) (make-leaf 'e 5) (make-leaf 'a 8)))
+(define test-set3 (list (make-leaf 'b 3) (make-leaf 'a 8) (make-leaf 'e 9)))
+(define exercise-270 (list (make-leaf 'a 2) (make-leaf 'boom 1) (make-leaf 'get 2) (make-leaf 'job 2) (make-leaf 'na 16) (make-leaf 'sha 3) (make-leaf 'yip 9) (make-leaf 'wah 1)))
+(define exercise-huffman (generate-huffman-tree exercise-270))
+(define song '(Get a job Sha na na na na na na na na Get a job Sha na na na na na na na na Wah yip yip yip yip yip yip yip yip yip Sha boom))
+(encode (list 'get 'a 'job) exercise-huffman)
+(encode (list 'sha 'na 'na 'na 'na 'na 'na 'na 'na) exercise-huffman)
+(encode (list 'wah 'yip 'yip 'yip 'yip 'yip 'yip 'yip 'yip 'yip) exercise-huffman)
+(encode (list 'Get 'a 'job 'Sha 'na 'na 'na 'na 'na 'na 'na 'na 'Get 'a 'job 'Sha 'na 'na 'na 'na 'na 'na 'na 'na 'Wah 'yip 'yip 'yip 'yip 'yip 'yip 'yip 'yip 'yip 'Sha 'boom) exercise-huffman)
+
+
+;; exercise 2.71
+
+
+
+(define exercise-271n5 (list (make-leaf 'a 1) (make-leaf 'b 2) (make-leaf 'c 4) (make-leaf 'd 8) (make-leaf 'e 16)))
+(define exercise-271n10 (list (make-leaf 'a 1) (make-leaf 'b 2) (make-leaf 'c 4) (make-leaf 'd 8) (make-leaf 'e 16)
+			      (make-leaf 'f 32) (make-leaf 'g 64) (make-leaf 'h 128) (make-leaf 'i 256) (make-leaf 'j 512)))
+
+(encode (list 'a) (generate-huffman-tree exercise-271n5))
+(encode (list 'e) (generate-huffman-tree exercise-271n5))
+
+;; least encoded is the height of the tree = n
+;; the most encoded symbol is 1 bit
+
+
+
+;; exercise 2.72
+;; most used is 1 bit
+;; least used is 26 bits
+;; order of growth is n
+
+
+;;  2.4  multiple representations for abstract data
+
+;; 2.4.1 representations for complex numbers
+
+(make-from-real-imag (real-part z) (imag-part z))
+
+(make-from-mag-ang (magnitude z) (angle z))
+
+(define (add-complex z1 z2)
+  (make-from-real-imag (+ (real-part z1) (real-part z2))
+		       (+ (imag-part z1) (imag-part z2))))
+
+(define (sub-complex z1 z2)
+  (make-from-real-imag (- (real-part z1) (real-part z2))
+		       (- (imag-part z1) (imag-part z2))))
+
+(define (mul-complex z1 z2)
+  (make-from-mag-ang (* (magnitude z1) (magnitude z2))
+		     (+ (angle z1) (angle z2))))
+
+(define (div-complex z1 z2)
+  (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
+		     (- (angle z1) (angle z2))))
+
+;; ben
+(define (real-part z) (car z))
+(define (imag-part z) (cdr z))
+(define (magnitude z)
+  (sqrt (+ (square (real-part z)) (square (imag-part z)))))
+(define (angle z)
+  (atan (imag-part z) (real-part z)))
+(define (make-from-real-imag x y) (cons x y))
+(define (make-from-mag-ang r a)
+  (cons (* r (cos a)) (* r (sin a))))
+
+;; alyssa
+(define (real-part z)
+  (* (magnitude z) (cos (angle z))))
+(define (imag-part z)
+  (* (magnitude z) (sin (angle z))))
+(define (magnitude z) (car z))
+(define (angle z) (cdr z))
+(define (make-from-real-imag x y)
+  (cons (sqrt (+ (square x) (square y)))
+	(atan y x)))
+(define (make-from-mag-ang r a) (cons r a))
+
+;; 2.4.2 tagged data
+
+(define (attach-tag type-tag contents)
+  (cons type-tag contents))
+(define (type-tag datum)
+  (if (pair? datum)
+      (car datum)
+      (error "Bad tagged datum -- TYPE-TAG" datum)))
+(define (contents datum)
+  (if (pair? datum)
+      (cdr datum)
+      (error "Bad tagged datum -- CONTENTS" datum)))
+(define (rectangular? z)
+  (eq? (type-tag z) ’rectangular))
+(define (polar? z)
+  (eq? (type-tag z) ’polar))
+
+;; ben revised
+(define (real-part-rectangular z) (car z))
+(define (imag-part-rectangular z) (cdr z))
+(define (magnitude-rectangular z)
+  (sqrt (+ (square (real-part-rectangular z))
+	   (square (imag-part-rectangular z)))))
+(define (angle-rectangular z)
+  (atan (imag-part-rectangular z)
+	(real-part-rectangular z)))
+(define (make-from-real-imag-rectangular x y)
+  (attach-tag ’rectangular (cons x y)))
+(define (make-from-mag-ang-rectangular r a)
+  (attach-tag ’rectangular
+	       (cons (* r (cos a)) (* r (sin a)))))
+
+;; alyssa revised
+(define (real-part-polar z)
+  (* (magnitude-polar z) (cos (angle-polar z))))
+(define (imag-part-polar z)
+  (* (magnitude-polar z) (sin (angle-polar z))))
+(define (magnitude-polar z) (car z))
+(define (angle-polar z) (cdr z))
+(define (make-from-real-imag-polar x y)
+  (attach-tag ’polar
+	       (cons (sqrt (+ (square x) (square y)))
+		     (atan y x))))
+(define (make-from-mag-ang-polar r a)
+  (attach-tag ’polar (cons r a)))
+
+
+;; generic selectors
+(define (real-part z)
+  (cond ((rectangular? z)
+	 (real-part-rectangular (contents z)))
+	((polar? z)
+	 (real-part-polar (contents z)))
+	(else (error "Unknown type -- REAL-PART" z))))
+(define (imag-part z)
+  (cond
+   ((rectangular? z)
+    (imag-part-rectangular (contents z)))
+   ((polar? z)
+    (imag-part-polar (contents z)))
+   (else (error "Unknown type -- IMAG-PART" z))))
+(define (magnitude z)
+  (cond ((rectangular? z)
+	 (magnitude-rectangular (contents z)))
+	((polar? z)
+	 (magnitude-polar (contents z)))
+	(else (error "Unknown type -- MAGNITUDE" z))))
+(define (angle z)
+  (cond ((rectangular? z)
+	 (angle-rectangular (contents z)))
+	((polar? z)
+	 (angle-polar (contents z)))
+	(else (error "Unknown type -- ANGLE" z))))
+
+
+(define (add-complex z1 z2)
+  (make-from-real-imag (+ (real-part z1) (real-part z2))
+		       (+ (imag-part z1) (imag-part z2))))
+
+(define (make-from-real-imag x y)
+  (make-from-real-imag-rectangular x y))
+(define (make-from-mag-ang r a)
+  (make-from-mag-ang-polar r a))
+
+;;
+;; dispatching on type ^^^^^
+;;
+
+
+;;  2.4.3 Data-Directed Programming and Additivity
+
+
+;;
+;; data-directed programming  vvvvvvv
+;;
+
+(put <op> <type> <item>)
+(get <op> <type>)
+
+
+;; novo ben
+
+(define (install-rectangular-package)
+  ;; internal procedures
+  (define (real-part z) (car z))
+  (define (imag-part z) (cdr z))
+  (define (make-from-real-imag x y) (cons x y))
+  (define (magnitude z)
+    (sqrt (+ (square (real-part z))
+	     (square (imag-part z)))))
+  (define (angle z)
+    (atan (imag-part z) (real-part z)))
+  (define (make-from-mag-ang r a)
+    (cons (* r (cos a)) (* r (sin a))))
+  ;; interface to the rest of the system
+  (define (tag x) (attach-tag ’rectangular x))
+  (put ’real-part ’(rectangular) real-part)
+  (put ’imag-part ’(rectangular) imag-part)
+  (put ’magnitude ’(rectangular) magnitude)
+  (put ’angle ’(rectangular) angle)
+  (put ’make-from-real-imag ’rectangular
+	(lambda (x y) (tag (make-from-real-imag x y))))
+  (put ’make-from-mag-ang ’rectangular
+	(lambda (r a) (tag (make-from-mag-ang r a))))
+  ’done)
+
+
+;; novo alyssa
+
+(define (install-polar-package)
+  ;; internal procedures
+  (define (magnitude z) (car z))
+  (define (angle z) (cdr z))
+  (define (make-from-mag-ang r a) (cons r a))
+  (define (real-part z)
+    (* (magnitude z) (cos (angle z))))
+  (define (imag-part z)
+    (* (magnitude z) (sin (angle z))))
+  (define (make-from-real-imag x y)
+    (cons (sqrt (+ (square x) (square y)))
+	  (atan y x)))
+  ;; interface to the rest of the system
+  (define (tag x) (attach-tag ’polar x))
+  (put ’real-part ’(polar) real-part)
+  (put ’imag-part ’(polar) imag-part)
+  (put ’magnitude ’(polar) magnitude)
+  (put ’angle ’(polar) angle)
+  (put ’make-from-real-imag ’polar
+	(lambda (x y) (tag (make-from-real-imag x y))))
+  (put ’make-from-mag-ang ’polar
+	(lambda (r a) (tag (make-from-mag-ang r a))))
+  ’done)
+
+
+;; apply
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (error
+	   "No method for these types -- APPLY-GENERIC"
+	   (list op type-tags))))))
+
+
+(define (real-part z) (apply-generic ’real-part z))
+(define (imag-part z) (apply-generic ’imag-part z))
+(define (magnitude z) (apply-generic ’magnitude z))
+(define (angle z) (apply-generic ’angle z))
+(define (make-from-real-imag x y)
+  ((get ’make-from-real-imag ’rectangular) x y))
+(define (make-from-mag-ang r a)
+  ((get ’make-from-mag-ang ’polar) r a))
+
+
+;; exercise 2.73
+
+;; to use data directed
+(define (assoc key records)
+  (cond ((null? records) false)
+        ((equal? key (caar records)) (car records))
+        (else (assoc key (cdr records)))))
+
+(define (make-table)
+  (let ((local-table (list '*table*)))
+    (define (lookup key-1 key-2)
+      (let ((subtable (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record (assoc key-2 (cdr subtable))))
+              (if record
+                  (cdr record)
+                  false))
+            false)))
+    (define (insert! key-1 key-2 value)
+      (let ((subtable (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record (assoc key-2 (cdr subtable))))
+              (if record
+                  (set-cdr! record value)
+                  (set-cdr! subtable
+                            (cons (cons key-2 value)
+                                  (cdr subtable)))))
+            (set-cdr! local-table
+                      (cons (list key-1
+                                  (cons key-2 value))
+                            (cdr local-table)))))
+      'ok)    
+    (define (dispatch m)
+      (cond ((eq? m 'lookup-proc) lookup)
+            ((eq? m 'insert-proc!) insert!)
+            (else (error "Unknown operation -- TABLE" m))))
+    dispatch))
+
+(define operation-table (make-table))
+(define get (operation-table 'lookup-proc))
+(define put (operation-table 'insert-proc!))
+
+
+
+;; old deriv
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+	((variable? exp) (if (same-variable? exp var) 1 0))
+	((sum? exp)
+	 (make-sum (deriv (addend exp) var)
+		   (deriv (augend exp) var)))
+	((product? exp)
+	 (make-sum
+	  (make-product (multiplier exp)
+			(deriv (multiplicand exp) var))
+	  (make-product (deriv (multiplier exp) var)
+			(multiplicand exp))))
+	<more rules can be added here>
+	(else (error "unknown expression type -- DERIV" exp))))
+
+
+;; data style deriv
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+	((variable? exp) (if (same-variable? exp var) 1 0))
+	(else ((get ’deriv (operator exp)) (operands exp)
+	       var))))
+(define (operator exp) (car exp))
+(define (operands exp) (cdr exp))
+
+;; a) porque não é preciso colocar esses dois caras na tabela, nao ha diferença entre os tipos de deriv.
+;;
+
+(define (install-deriv-package)
+  ;; internal procedures
+  (define (addend exp)
+    (cadr exp))
+  (define (augend exp)
+    (caddr exp))
+  (define (make-sum exp var)
+    ((sum? exp)
+	 (make-sum (deriv (addend exp) var)
+		   (deriv (augend exp) var))))
+  (define (multiplier exp)
+    (cadr exp))
+  (define (multiplicand exp)
+    (caddr exp))
+  (define (make-product exp var)
+    (((product? exp)
+	 (make-sum
+	  (make-product (multiplier exp)
+			(deriv (multiplicand exp) var))
+	  (make-product (deriv (multiplier exp) var)
+			(multiplicand exp))))))
+
+  (define (exponentiation? x)
+    (and (pair? x) (eq? (car x) 'expo)))
+  (define (base x) (cadr x))
+  (define (exponent x) (caddr x))
+  (define (make-exponentiation x exp)
+    (cond ((= exp 0) 1)
+	  ((= exp 1) x)
+	  (list 'expo x exp)))
+  
+  ;; interface to the rest of the system
+  (define (tag x) (attach-tag ’deriv x))
+  (put ’deriv '+ make-sum)
+  (put ’deriv '* make-product)
+  (put 'deriv 'expo make-exponentiation)
+  ’done)
+
+;; exercise 2.74
+
+;; Message Passing
+
+;; make complex number message passing style
+(define (make-from-real-imag x y)
+  (define (dispatch op)
+    (cond ((eq? op ’real-part) x)
+	  ((eq? op ’imag-part) y)
+	  ((eq? op ’magnitude)
+	   (sqrt (+ (square x) (square y))))
+	  ((eq? op ’angle) (atan y x))
+	  (else
+	   (error "Unknown op -- MAKE-FROM-REAL-IMAG" op))))
+  dispatch)
+
+;; exercise 2.75
+
+
+(define (make-from-mang-ang x y)
+  (define (dispatch op)
+    (cond ((eq? op ’real-part) (* x (cos y)))
+	  ((eq? op ’imag-part) (* x (sin y)))
+	  ((eq? op ’magnitude) x)
+	  ((eq? op ’angle) y)
+	  (else
+	   (error "Unknown op -- MAKE-FROM-REAL-IMAG" op))))
+  dispatch)
+
+;; exercise 2.76
+;;
+;; Explicit Dispatch: para adicionar novos tipos e operações, é preciso primeiro criar a operacao com nome unico
+;;                    e depois mudar na funcao que seleciona as funcoes, provavelmente vai adicionar um novo if else
+;;
+;; Data-directed: para adicionar novos tipos e operações é bem simples, vc só instala novas colunas ou linhas na tabela
+;;                teoricamente (eu acho) você pode ter células vazias, mas as chamadas estao vinculadas às tags de tipos
+;;                de cada 'pacote' instalado
+;;
+;; message-passing: parecido com orientação a objetos, para adicionar um metodo na funcao vc só coloca mais um if else
+;;                  dentro do objeto
+;;
+;; quando novos tipos sao adicionados direto, precisa usar o data-directed. pq é só criar um pacote novo para o tipo novo
+;; e adicionar com install
+;;
+;; quando novas operacoes sao adicionadas, pode ser o data-directed ou message passing (talvez ate dispatch), de qualquer
+;; jeito, possivelmente vai ter que adicionar a operacao em todos os tipos de dados
+;;
+;;
+;;
+
+
+
+;; 2.5 Systems with Generic Operations
+
+
