@@ -2770,3 +2770,84 @@ each set has its own way
 
 ;; b) funciona do jeito que ta
 ;; c) bota um if depois do if de length testando se sao tipos differentes
+
+;; 2.82
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (if (= (length args) 2)
+	      (let ((type1 (car type-tags))
+		    (type2 (cadr type-tags))
+		    (a1 (car args))
+		    (a2 (cadr args)))
+		(let ((t1->t2 (get-coercion type1 type2))
+		      (t2->t1 (get-coercion type2 type1)))
+		  (cond (t1->t2
+			 (apply-generic op (t1->t2 a1) a2))
+			(t2->t1
+			 (apply-generic op a1 (t2->t1 a2)))
+			(else
+			 (error "No method for these types"
+				(list op type-tags))))))
+	      (error "No method for these types"
+		     (list op type-tags)))))))
+
+(define (coerce-list list)
+  (define (coerce-to-type type list)
+    (let ((type2 (tag-type (car list))))
+      (let ((conv (get-coercion type2 type)))
+	(cond (conv (cons (conv (car list)) (coerce-to-type type (cdr list))))
+	      (else #f)))))
+  (define (iter cur list)
+    (let ((coerced-list (coerce-to-type (tag-type (car cur)) list)))
+      (if (problem? coerced-list)
+	  (iter (cdr cur) list)
+	  coerced-list)))
+  (define (problem? list)
+    (cond ((null? list) #f)
+	  ((not (car list)) #t)
+	  (else (problem? (cdr list)))))
+  (iter (car list) list))
+
+
+;; exercise 2.83
+
+;; =========     coercion table     ===========
+(define *coercion-table* (make-equal-hash-table)) 
+
+(define (put-coercion type1 type2 proc) 
+  (hash-table/put! *coercion-table* (list type1 type2) proc)) 
+
+(define (get-coercion type1 type2) 
+  (hash-table/get *coercion-table* (list type1 type2) '())) 
+(define (install-coercion-package) 
+  (define (scheme-number->complex n) 
+    (make-complex-from-real-imag (contents n) 0)) 
+  (define (scheme-number->rational n) 
+    (make-rational (contents n) 1)) 
+  (put-coercion 'scheme-number 'rational scheme-number->rational) 
+  (put-coercion 'scheme-number 'complex scheme-number->complex) 
+  'done) 
+
+(install-coercion-package) 
+;; =========     coercion table     ===========
+
+  
+  (define (integer->rational x)
+  (make-rat x 1))
+
+(define (rational->real x)
+  (make-real x))
+
+(put-coerce 'integer 'rational integer->rational)
+(put-coerce 'rational 'real rational->real)
+
+(define (generic-raise x)
+  (define (upper x)
+    (cond ((integer? x) 'rational)
+	  ((rational? x) 'real)
+	  ((real? x) 'complex)))
+  ((get (type-tag x) (upper (type-tag x))) x)
+  )
