@@ -1877,7 +1877,7 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
   (put 'make-from-mag-ang 'rectangular
 	(lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
-
+(install-rectangular-package)
 ;; novo alyssa
 
 (define (install-polar-package)
@@ -1903,6 +1903,7 @@ ar (cdr (cdr (cdr (make-rectangle2 (make-point 1 1) (make-point 1 2) (make-point
   (put 'make-from-mag-ang 'polar
 	(lambda (r a) (tag (make-from-mag-ang r a))))
   'done)
+(install-polar-package)
 
 ;; apply
 
@@ -2503,6 +2504,8 @@ each set has its own way
 (define (make-complex-from-mag-ang r a)
   ((get 'make-from-mag-ang 'complex) r a))
 
+
+
 ;; exercise 2.77
 
 
@@ -2514,13 +2517,13 @@ each set has its own way
     ((get 'make-from-mag-ang 'polar) r a))
   ;; internal procedures
   (define (real-part z)
-    ((get 'real-part (cadr z)) z))
+    (apply-generic 'real-part z))
   (define (imag-part z)
-    ((get 'imag-part (cadr z)) z))
+    (apply-generic 'imag-part z))
   (define (magnitude z)
-    ((get 'magnitude (cadr z)) z))
+    (apply-generic 'magnitude z))
   (define (angle z)
-    ((get 'angle (cadr z)) z))
+    (apply-generic 'angle z))
   
   (define (add-complex z1 z2)
     (make-from-real-imag (+ (real-part z1) (real-part z2))
@@ -2555,7 +2558,27 @@ each set has its own way
   (put 'magnitude '(complex) magnitude)
   (put 'angle '(complex) angle)
   'done)
+(install-complex-package)
 
+(define complex-teste ((get 'make-from-real-imag 'complex) 1 2))
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (error
+	   "No method for these types -- APPLY-GENERIC"
+	   (list op type-tags))))))
+(apply-generic 'real-part complex-teste)
+(apply-generic 'real-part rectangular-teste)
+(get 'real-part '(rectangular))
+(define rectangular-teste ((get 'make-from-real-imag 'rectangular) 1 2))
+
+(define (make-complex-rec x y)
+  ((get 'make-from-real-imag 'complex) x y))
+
+(make-complex-rec 1 2)
+(apply-generic 'make-from-real-imag 'complex 1 2)
 ;; do jeito que livro falou pra fazer nao funciona. Você tem que colocar a definição das funcoes na package complex pra depois poder dar put
 ;; pra chamar de fora do package, precisa ser criado um "magnitude" chamando apply-generic com tag '(complex)
 ;; ele vai obter a definicao "magnitude" dentro do package complex e vai chamá-lo
@@ -2594,7 +2617,9 @@ each set has its own way
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
   'done)
-
+(install-scheme-number-package)
+(define teste-number ((get 'make 'scheme-number) 3))
+(apply-generic 'add teste-number teste-number)
 
 
 
@@ -2637,8 +2662,10 @@ each set has its own way
 
 (define (equ? x y)
   ((get 'equ? 'generic) x y))
-
-
+(get 'equ? 'complex)
+(define test-complex ((get 'make-from-real-imag 'complex) 1 2))
+(get 'make-from-real-imag 'complex)
+(get 'make-from-real-imag 'rectangular)
 ;; exercise 2.80 o mesmo das coisa em cima
 
 (define (=zero? x)
@@ -2675,10 +2702,10 @@ each set has its own way
 
 ;; to be included in the complex package
 (define (add-complex-to-schemenum z x)
-(make-from-real-imag (+ (real-part z) x)
-(imag-part z)))
+  (make-from-real-imag (+ (real-part z) x)
+		       (imag-part z)))
 (put ’add ’(complex scheme-number)
-(lambda (z x) (tag (add-complex-to-schemenum z x))))
+      (lambda (z x) (tag (add-complex-to-schemenum z x))))
 
 
 (define (install-complex-package)
@@ -2814,28 +2841,49 @@ each set has its own way
 
 ;; exercise 2.83
 
-;; =========     coercion table     ===========
-(define *coercion-table* (make-equal-hash-table)) 
 
-(define (put-coercion type1 type2 proc) 
-  (hash-table/put! *coercion-table* (list type1 type2) proc)) 
 
-(define (get-coercion type1 type2) 
-  (hash-table/get *coercion-table* (list type1 type2) '())) 
-(define (install-coercion-package) 
-  (define (scheme-number->complex n) 
-    (make-complex-from-real-imag (contents n) 0)) 
-  (define (scheme-number->rational n) 
-    (make-rational (contents n) 1)) 
-  (put-coercion 'scheme-number 'rational scheme-number->rational) 
-  (put-coercion 'scheme-number 'complex scheme-number->complex) 
-  'done) 
 
-(install-coercion-package) 
-;; =========     coercion table     ===========
+(define (assoc key records)
+  (cond ((null? records) false)
+        ((equal? key (caar records)) (car records))
+        (else (assoc key (cdr records)))))
 
-  
-  (define (integer->rational x)
+(define (make-table-coercion)
+  (let ((local-table (list '*table-coercion*)))
+    (define (lookup key-1 key-2)
+      (let ((subtable (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record (assoc key-2 (cdr subtable))))
+              (if record
+                  (cdr record)
+                  false))
+            false)))
+    (define (insert! key-1 key-2 value)
+      (let ((subtable (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record (assoc key-2 (cdr subtable))))
+              (if record
+                  (set-cdr! record value)
+                  (set-cdr! subtable
+                            (cons (cons key-2 value)
+                                  (cdr subtable)))))
+            (set-cdr! local-table
+                      (cons (list key-1
+                                  (cons key-2 value))
+                            (cdr local-table)))))
+      'ok)    
+    (define (dispatch m)
+      (cond ((eq? m 'lookup-proc) lookup)
+            ((eq? m 'insert-proc!) insert!)
+            (else (error "Unknown operation -- TABLE" m))))
+    dispatch))
+
+(define operation-table-coercion (make-table-coercion))
+(define get (operation-table-coercion 'lookup-proc))
+(define put (operation-table-coercion 'insert-proc!))
+
+(define (integer->rational x)
   (make-rat x 1))
 
 (define (rational->real x)
