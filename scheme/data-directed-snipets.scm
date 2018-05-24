@@ -1,5 +1,5 @@
 ;; =============     table package        ===================
-
+(require sicp)
 (define (assoc key records)
   (cond ((null? records) false)
         ((equal? key (caar records)) (car records))
@@ -60,6 +60,24 @@
   (eq? (type-tag z) 'polar))
 
 
+(define (attach-tag type-tag contents)
+  (cond ((number? contents) contents)
+	((pair? contents) (cons type-tag contents))
+	(else (error "nao sei" contents))))
+
+(define (type-tag datum)
+  (cond ((pair? datum) (car datum))
+	((number? datum) 'scheme-number)
+	(else (error "Bad tagged datum -- TYPE-TAG" datum))))
+
+(define (contents datum)
+  (cond ((pair? datum) (cdr datum))
+	((number? datum) datum)
+	(else (error "Bad tagged datum -- CONTENTS" datum))))
+
+
+
+
 ;; =============     tag package        ===================
 
 
@@ -72,3 +90,8 @@
 	  (error
 	   "No method for these types -- APPLY-GENERIC"
 	   (list op type-tags))))))
+
+
+
+
+
