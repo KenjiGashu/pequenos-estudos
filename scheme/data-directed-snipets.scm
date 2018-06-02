@@ -59,7 +59,7 @@
 (define (polar? z)
   (eq? (type-tag z) 'polar))
 
-
+;; new tags from exercise ??
 (define (attach-tag type-tag contents)
   (cond ((number? contents) contents)
 	((pair? contents) (cons type-tag contents))

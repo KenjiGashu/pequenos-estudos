@@ -14,6 +14,8 @@
   (put 'sin '(real) (lambda (x) (tag (sin x))))
   (put 'cos '(real) (lambda (x) (tag (cos x))))
   (put 'square '(real) (lambda (x) (tag (square x))))
+  ;; exercise 2.88
   (put '=zero? '(real) =zero?)
+  (put 'negate '(real) (lambda (x) (tag (- x))))
   'done)
 (install-real-package)

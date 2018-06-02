@@ -19,6 +19,7 @@
 (define (install-scheme-number-package)
   (define (square x)
     (* x x))
+  ;; exercise 2.88
   (define (=zero? x)
     (= 0 x))
   (define (tag x)
@@ -35,6 +36,7 @@
        (lambda (x) (tag x)))
   (put 'equ? '(scheme-number scheme-number)
        (lambda (x y) (= x y)))
+  (put 'negate '(scheme-number) (lambda (x) (tag (- x))))
 
   (put 'sqrt '(scheme-number) (lambda (x) (tag (sqrt x))))
   (put 'atan '(scheme-number) (lambda (x y) (tag (atan x t))))
@@ -43,7 +45,6 @@
   (put 'square '(scheme-number) (lambda (x) (tag (square x))))
   (put '=zero? '(scheme-number) =zero?)
   'done)
-
 
 (install-scheme-number-package)
 

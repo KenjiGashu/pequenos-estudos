@@ -15,6 +15,7 @@
   (define (equ? x y)
     (cond ((and (= (real-part x) (real-part y)) (= (imag-part x) (imag-part y))) #t)
 	  (else #f)))
+  ;; exercise 2.88
   (define (=zero? x)
     (and (= 0 (real-part x)) (= 0 (imag-part x))))
   (put 'real-part '(polar) real-part)
@@ -49,6 +50,9 @@
 	  (else #f)))
   (define (=zero? x)
     (and (= 0 (real-part x)) (= 0 (imag-part x))))
+  (define (negate x)
+    (make-from-real-imag (- (real-part x))
+			 (- (imag-part x))))
   (put 'real-part '(polar) real-part)
   (put 'imag-part '(polar) imag-part)
   (put 'magnitude '(polar) magnitude)
@@ -59,6 +63,7 @@
        (lambda (r a) (tag (make-from-mag-ang r a))))
   (put 'equ? '(polar polar) equ?)
   (put '=zero? '(polar) =zero?)
+  (put 'negate '(polar) (lambda (x) (tag (negate x))))
 
   'done)
 

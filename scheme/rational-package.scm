@@ -37,6 +37,9 @@
     (cond ((and (= (numer x) (numer y)) (= (denom x) (denom y))) #t)))
   (define (=zero? x)
     (= 0 (numer x)))
+  ;; exercise 2.88
+  (define (negate x)
+    (make-rat (- (numer x)) (denom x)))
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -58,5 +61,6 @@
   (put 'cos '(rational) (lambda (x) (tag (cos-rat x))))
   (put 'square '(rational) (lambda (x) (tag (square-rat x))))
   (put '=zero? '(rational) =zero?)
+  (put 'negate '(rational) (lambda (x) (tag (negate x))))
   'done)
 (install-rational-package)

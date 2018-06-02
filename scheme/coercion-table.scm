@@ -140,18 +140,6 @@
 				(list op type-tags))))))
 	      (generic-raise-list args))))))
 
-;; exercise 2.85
-(define (drop x)
-  (let ((tag (type-tag x))
-	(num (contents x)))
-    (let ((conversao (get-coercion 'lower (list tag))))
-      (if conversao
-	  (let ((numero-convertido (conversao num)))
-	    (let ((de-volta-acima (generic-raise numero-convertido)))
-	      (if (apply-generic 'equ? de-volta-acima x)
-		  (drop numero-convertido)
-		  x)))
-	  x))))
 
 (define (apply-generic-coercion op . args)
   (let ((type-tags (map type-tag args)))
@@ -166,53 +154,66 @@
 (define (real->complex x)
   ((get-coercion 'real 'complex) (contents x)))
 
+;; exercise 2.85
+(define (drop x)
+  (let ((tag (type-tag x))
+	(num (contents x)))
+    (let ((conversao (get-coercion 'lower (list tag))))
+      (if conversao
+	  (let ((numero-convertido (conversao num)))
+	    (let ((de-volta-acima (generic-raise numero-convertido)))
+	      (if (apply-generic 'equ? de-volta-acima x)
+		  (drop numero-convertido)
+		  x)))
+	  x))))
 
-(define rational-test ((get 'make 'rational) 1 2))
-(define real-test ((get 'make 'real) 4.5))
-(define teste-complex2 ((get 'make-from-real-imag 'complex) 2 0))
-;;test scheme number
-(define number-test ((get 'make 'scheme-number) 2))
-(define lista-scheme-number (list (cons 'scheme-number 1) (cons 'rational (cons 1 2)) (cons 'scheme-number 3)))
-(define teste-complex ((get 'make-from-real-imag 'complex) 2 2))
-(define number-test2 ((get 'make 'scheme-number) 1))
-(define rational-test2 ((get 'make 'rational) 2 2))
+
+;; (define rational-test ((get 'make 'rational) 1 2))
+;; (define real-test ((get 'make 'real) 4.5))
+;; (define teste-complex2 ((get 'make-from-real-imag 'complex) 2 0))
+;; ;;test scheme number
+;; (define number-test ((get 'make 'scheme-number) 2))
+;; (define lista-scheme-number (list (cons 'scheme-number 1) (cons 'rational (cons 1 2)) (cons 'scheme-number 3)))
+;; (define teste-complex ((get 'make-from-real-imag 'complex) 2 2))
+;; (define number-test2 ((get 'make 'scheme-number) 1))
+;; (define rational-test2 ((get 'make 'rational) 2 2))
 
 
 
 
-;; testes antes de testar coercion complex->real
+;; ;; testes antes de testar coercion complex->real
 
-((get 'real-part '(complex)) teste-complex)
-(apply-generic 'real-part teste-complex)
-((get 'make 'real) (apply-generic 'real-part teste-complex))
-((get 'make 'real) 5)
-((get-coercion 'lower '(complex)) teste-complex)
+;; ((get 'real-part '(complex)) teste-complex)
+;; (apply-generic 'real-part teste-complex)
+;; ((get 'make 'real) (apply-generic 'real-part teste-complex))
+;; ((get 'make 'real) 5)
+;; ((get-coercion 'lower '(complex)) teste-complex)
 
-;; testes de real->rational
-(define (mul-10 x mul-times)
-  (let ((mult-by-10 (* mul-times x)))
-    (if (integer? mult-by-10)
-	(cons (* mul-times x) mul-times)
-	(mul-10 (* mul-times x) (* 10 mul-times)))))
-(mul-10 4.5 10)
-(car (mul-10 4.5 10))
-(cdr (mul-10 4.5 10))
-((get 'make 'rational) (car (mul-10 4.5 10)) (cdr (mul-10 4.5 10)))
-((get 'make 'rational) 45 10)
+;; ;; testes de real->rational
+;; (define (mul-10 x mul-times)
+;;   (let ((mult-by-10 (* mul-times x)))
+;;     (if (integer? mult-by-10)
+;; 	(cons (* mul-times x) mul-times)
+;; 	(mul-10 (* mul-times x) (* 10 mul-times)))))
+;; (mul-10 4.5 10)
+;; (car (mul-10 4.5 10))
+;; (cdr (mul-10 4.5 10))
+;; ((get 'make 'rational) (car (mul-10 4.5 10)) (cdr (mul-10 4.5 10)))
+;; ((get 'make 'rational) 45 10)
 
-((get-coercion 'lower '(real)) (contents real-test))
-((get-coercion 'lower '(real)) 4.5) 
+;; ((get-coercion 'lower '(real)) (contents real-test))
+;; ((get-coercion 'lower '(real)) 4.5) 
 
-;; testes de rational->integer
-((get-coercion 'lower '(rational)) (contents rational-test))
-((get 'make 'scheme-number) 7)
-((get-coercion 'lower '(rational)) (contents rational-test2))
-((get-coercion 'raise '(scheme-number)) (contents number-test2))
+;; ;; testes de rational->integer
+;; ((get-coercion 'lower '(rational)) (contents rational-test))
+;; ((get 'make 'scheme-number) 7)
+;; ((get-coercion 'lower '(rational)) (contents rational-test2))
+;; ((get-coercion 'raise '(scheme-number)) (contents number-test2))
 
-(apply-generic 'equ? rational-test2 (generic-raise number-test2))
+;; (apply-generic 'equ? rational-test2 (generic-raise number-test2))
 
-;; testes de drop
-(drop rational-test2)
-(drop real-test)
-(drop teste-complex2)
+;; ;; testes de drop
+;; (drop rational-test2)
+;; (drop real-test)
+;; (drop teste-complex2)
 
