@@ -36,10 +36,13 @@
     (let ((order (terms-order terms))
 	  (coeff-list (terms-coeff-list terms)))
       (begin (define (iteration current-term-order current-coeff-list)
-	       (cond ((null? current-coeff-list) (if (> new-term-order current-term-order)
-						     (cons 0 (iteration (+ current-term-order 1) (cdr current-coeff-list)))
-						     (cons new-term-coeff '())))
-		     ((= new-term-order current-term-order) (cons (+ new-term-coeff (car coeff-list)) (cdr coeff-list)))
+	       (cond ((> new-term-coeff current-term-order) (iteration (+ current-term-order 1) (cons 0 current-coeff-list))
+		      ;; (if (> new-term-order current-term-order)
+		      ;; 	  (cons 0 (iteration (+ current-term-order 1) (cdr current-coeff-list)))
+		      ;; 	  (cons new-term-coeff '()))
+		      )
+
+		     ((= new-term-order current-term-order) (cons (+ new-term-coeff (car current-coeff-list)) (cdr current-coeff-list)))
 		     (else (cons (car current-coeff-list) (iteration (- current-term-order 1) (cdr current-coeff-list))))))
 	     ;;return terms
 	     (if (> new-term-order order)
@@ -65,6 +68,8 @@
     (cond ((< (terms-order terms1) 0) terms2)
 	  (else (let ((order1 (terms-order terms1))
 		      (coeff-list1 (terms-coeff-list terms1)))
+		  (display order1)
+		  (display coeff-list1)
 		  (begin (adjoin-term order1
 				      (car coeff-list1)
 				      terms2)
@@ -133,7 +138,7 @@
   (put 'make 'polynomial-dense
        (lambda (var terms) (tag (make-poly var terms))))
   (put '=zero? '(polynomial-dense) =zero?-p)
-  (put 'adjoin-term 'polynomial-dense (lambda (order coeff terms) (tag (adjoin-term order coeff terms))))
+  (put 'adjoin-term 'polynomial-dense adjoin-term)
   (put 'add-terms 'polynomial-dense add-terms)
   'done)
 
@@ -146,9 +151,20 @@
   (cons var coeff-list))
 (define teste-adjoin-term (get 'adjoin-term 'polynomial-dense))
 (define teste-add-terms (get 'add-terms 'polynomial-dense))
-(teste-adjoin-term 2 2 (list 2 1 0 0))
 (teste-make-terms (- (car (list 2 1 0 0)) 1) (cdr (cdr (list 2 1 0 0))))
 (teste-make-terms 1 (list 1 1))
-
+(define (temp-menino terms1 terms2)
+  (cond ((< (car terms1) 0) terms2)
+	(else (let ((order1 (car terms1))
+		    (coeff-list1 (cdr terms1)))
+		(display order1)
+		(display coeff-list1)
+		(display (car coeff-list1))
+		(begin (let ((adjoined-terms2 (teste-adjoin-term order1
+								 (car coeff-list1)
+								 terms2)))
+			 (display adjoined-terms2)
+			 (temp-menino (teste-make-terms (- order1 1) (cdr coeff-list1)) adjoined-terms2)))))))
+(temp-menino (list 2 2 0 0) (list 2 1 1 1))
 (teste-add-terms (list 2 2 0 0) (list 2 1 1 1))
 (teste-adjoin-term )
