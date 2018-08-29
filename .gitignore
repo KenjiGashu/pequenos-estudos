@@ -1,5 +1,5 @@
 .emacs-backups/
-angular-tour-of-heroes/
+
 commonlisp-gui/
 learnyounode/
 arduino/
@@ -8,6 +8,10 @@ my-sbcl/
 teste-angular/
 testeweb/
 dotemacs/
+
+
+jsrdbg/
+the-super-tiny-compiler/
 
 ##
 ## scheme
