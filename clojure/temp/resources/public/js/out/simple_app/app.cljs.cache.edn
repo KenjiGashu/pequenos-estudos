@@ -1,0 +1,2 @@
+;; Analyzed by ClojureScript 1.7.122
+{:name simple-app.app, :doc nil, :excludes #{}, :use-macros nil, :require-macros nil, :uses nil, :requires {greet simple-app.greet, simple-app.greet simple-app.greet}, :imports nil}

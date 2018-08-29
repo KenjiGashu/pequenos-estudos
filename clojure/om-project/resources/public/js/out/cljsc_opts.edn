@@ -1,0 +1,1 @@
+{:main "om-project.core", :asset-path "js/out", :output-to "resources/public/js/main.js", :output-dir "resources/public/js/out", :verbose true, :optimizations :none, :source-map-timestamp true, :preloads [figwheel.connect], :external-config #:figwheel{:config {:build-id "om-project", :websocket-url "ws://localhost:3449/figwheel-ws"}}}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Welcome to caixa</title>
+  </head>
+  <body>
+
+    <!-- <div class="container-fluid"> -->
+    <!--   <div class="row"> -->
+    <!-- 	<div class="span12"> -->
+    <!-- 	  <ul class="messages"> -->
+    <!--         {% for item in precos %} -->
+    <!--         <li> -->
+    <!--           <p>{{item}}</p> -->
+    <!--           <p>{{item.data_inicio}}</p> -->
+    <!--           <p> - {{item.data_fim}}</p> -->
+    <!--         </li> -->
+    <!--         {% endfor %} -->
+    <!--       </ul> -->
+
+    <!-- 	</div> -->
+        
+    <!--   </div> -->
+    <!--   <div class="row"> -->
+    <!-- 	<div class="span12"> -->
+    <!--       <form method="POST" action="/api/precos"> -->
+    <!--         {% csrf-field %} -->
+    <!-- 	    <p> -->
+    <!-- 	      Valor -->
+    <!-- 	      <input class="form-control" -->
+    <!-- 		     type="number" -->
+    <!-- 		     name="valor" -->
+    <!-- 		     value="{{valor}}" -->
+    <!-- 		     /> -->
+    <!-- 	    </p> -->
+    <!--         <p> -->
+    <!--           data_inicio: -->
+    <!--           <input class="form-control" -->
+    <!--                  type="date" -->
+    <!--                  name="data_inicio" -->
+    <!--                  value="{{data_inicio}}" /> -->
+    <!--         </p> -->
+    <!--         {% if errors.data_inicio %} -->
+    <!--         <div class="alert alert-danger">{{errors.data_inicio|join}}</div> -->
+    <!--         {% endif %} -->
+    <!--         <p> -->
+    <!--           data_fim: -->
+    <!-- 	      <input class="form-control" -->
+    <!--                  type="date" -->
+    <!--                  name="data_fim" -->
+    <!--                  value="{{data_fim}}" /> -->
+
+    <!--         </p> -->
+    <!--         {% if errors.data_fim %} -->
+    <!--         <div class="alert alert-danger">{{errors.data_fim|join}}</div> -->
+    <!--         {% endif %} -->
+    <!--         <input type="submit" class="btn btn-primary" value="comment" /> -->
+    <!--       </form> -->
+    <!-- 	</div> -->
+	
+    <!--   </div> -->
+
+    <!-- </div> -->
+    
+    <div id="app">
+      <div class="container-fluid">
+        <div class="card-deck">
+          <div class="card-block">
+            <h4>Welcome to caixa</h4>
+            <p>If you're seeing this message, that means you haven't yet compiled your ClojureScript!</p>
+            <p>Please run <code>lein figwheel</code> to start the ClojureScript compiler and reload the page.</p>
+            <h4>For better ClojureScript development experience in Chrome follow these steps:</h4>
+            <ul>
+              <li>Open DevTools
+              <li>Go to Settings ("three dots" icon in the upper right corner of DevTools > Menu > Settings F1 > General > Console)
+              <li>Check-in "Enable custom formatters"
+              <li>Close DevTools
+              <li>Open DevTools
+            </ul>
+            <p>See <a href="http://www.luminusweb.net/docs/clojurescript.md">ClojureScript</a> documentation for further details.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- scripts and styles -->
+    {% style "/assets/bootstrap/css/bootstrap.min.css" %}
+    {% style "/assets/font-awesome/css/all.css" %}
+    {% style "/css/screen.css" %}
+
+    {% script "/assets/jquery/jquery.min.js" %}
+    {% script "/assets/font-awesome/js/all.js" %}
+    {% script "/assets/tether/dist/js/tether.min.js" %}
+    {% script "/assets/bootstrap/js/bootstrap.min.js" %}
+
+    <script type="text/javascript">
+        var csrfToken = "{{csrf-token}}";
+    </script>
+    {% script "/js/app.js" %}
+  </body>
+</html>

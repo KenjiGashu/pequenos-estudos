@@ -1,0 +1,1 @@
+web: java -cp target/uberjar/caixa.jar clojure.main -m caixa.core

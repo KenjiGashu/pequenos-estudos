@@ -1,0 +1,1 @@
+{:main "hello-seymore.core", :optimizations :none, :output-to "main.js", :output-dir "out", :source-map-timestamp true}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="span12">
+        <ul class="messages">
+            {% for item in precos %}
+            <li>
+		<p>{{item.datainicio}}</p>
+                <p>{{item.datafim}}</p>
+                <p>{{item.valor}}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="span12">
+        <form method="POST" action="/">
+                {% csrf-field %}
+                <p>
+                    valor:
+                    <input class="form-control"
+                           type="number"
+                           name="valor"
+                           value="{{valor}}" />
+                </p>
+                {% if errors.valor %}
+                <div class="alert alert-danger">{{errors.valor|join}}</div>
+                {% endif %}
+
+		<p>
+		  datainicio:
+		  <input class="form-control"
+			 type="date"
+			 name="datainicio"
+			 value="{{datainicio}}">
+		</p>
+		{% if errors.datainicio %}
+                <div class="alert alert-danger">{{errors.datainicio|join}}</div>
+                {% endif %}
+
+		<p>
+		  datafim:
+		  <input class="form-control"
+			 type="date"
+			 name="datafim"
+			 value="{{datafim}}">
+		</p>
+		{% if errors.datafim %}
+                <div class="alert alert-danger">{{errors.datafim|join}}</div>
+                {% endif %}
+
+                <input type="submit" class="btn btn-primary" value="comment" />
+        </form>
+    </div>
+</div>
+{% endblock %}

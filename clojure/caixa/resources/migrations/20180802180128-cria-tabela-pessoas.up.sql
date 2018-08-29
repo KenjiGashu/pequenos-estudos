@@ -1,0 +1,5 @@
+CREATE TABLE pessoas
+(id_pessoa INTEGER PRIMARY KEY AUTO_INCREMENT,
+ nome VARCHAR(200),
+ rg VARCHAR(200),
+ telefone VARCHAR(200));
